@@ -1,0 +1,21 @@
+# Core dependencies
+pillow>=10.0.0
+requests>=2.31.0
+yt-dlp>=2023.12.30
+mutagen>=1.47.0
+langcodes>=3.3.0
+
+# File handling and system
+pathlib>=1.0.1
+
+# Image processing
+Pillow>=10.0.0
+
+# Concurrent processing
+futures>=3.0.5
+
+# Optional but recommended for better unicode support
+chardet>=5.2.0
+
+# Additional utilities
+python-magic>=0.4.27  # for better file type detection
