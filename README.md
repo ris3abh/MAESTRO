@@ -10,7 +10,7 @@
 [![Code Style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 <p align="center">
-  <img src="docs/assets/maestro-logo.png" alt="MAESTRO.ai Logo" width="200"/>
+  <img src="src/MAESTRO.png" alt="MAESTRO.ai Logo" width="200"/>
 </p>
 
 *Transform your audio with cutting-edge AI-powered music production*
