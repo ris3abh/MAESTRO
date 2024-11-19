@@ -9,12 +9,26 @@ class AudioQualityValidator:
                  min_sample_rate: int = 44100,
                  min_bit_depth: int = 16,
                  min_dynamic_range: float = 10.0,
-                 max_clipping_ratio: float = 0.01):  # Allow 1% clipping
+                 max_clipping_ratio: float = 0.01):
         self.min_duration = min_duration
         self.min_sample_rate = min_sample_rate
         self.min_bit_depth = min_bit_depth
         self.min_dynamic_range = min_dynamic_range
         self.max_clipping_ratio = max_clipping_ratio
+    
+    def convert_to_serializable(self, obj):
+        """Convert numpy types to Python native types"""
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {key: self.convert_to_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self.convert_to_serializable(item) for item in obj]
+        return obj
         
     def check_audio_quality(self, audio_path: Path) -> Tuple[bool, List[str], Dict[str, float]]:
         """
@@ -30,24 +44,24 @@ class AudioQualityValidator:
             
             # Check duration
             duration = librosa.get_duration(y=y, sr=sr)
-            metrics['duration'] = duration
+            metrics['duration'] = float(duration)
             if duration < self.min_duration:
                 issues.append(f"Duration too short: {duration:.1f}s < {self.min_duration}s")
             
             # Check sample rate
-            metrics['sample_rate'] = sr
+            metrics['sample_rate'] = int(sr)
             if sr < self.min_sample_rate:
                 issues.append(f"Sample rate too low: {sr} < {self.min_sample_rate}")
             
             # Check for clipping
-            clipping_samples = np.sum(np.abs(y) >= 0.99)  # Use 0.99 as threshold
-            clipping_ratio = clipping_samples / len(y)
+            clipping_samples = np.sum(np.abs(y) >= 0.99)
+            clipping_ratio = float(clipping_samples / len(y))
             metrics['clipping_ratio'] = clipping_ratio
             if clipping_ratio > self.max_clipping_ratio:
                 issues.append(f"Excessive clipping: {clipping_ratio*100:.1f}% of samples")
             
             # Check dynamic range
-            dynamic_range = 20 * np.log10(np.max(np.abs(y)) / (np.mean(np.abs(y)) + 1e-6))
+            dynamic_range = float(20 * np.log10(np.max(np.abs(y)) / (np.mean(np.abs(y)) + 1e-6)))
             metrics['dynamic_range'] = dynamic_range
             if dynamic_range < self.min_dynamic_range:
                 issues.append(f"Low dynamic range: {dynamic_range:.1f}dB")
@@ -59,6 +73,9 @@ class AudioQualityValidator:
             
         except Exception as e:
             issues.append(f"Error analyzing file: {str(e)}")
+        
+        # Convert all metrics to serializable types
+        metrics = self.convert_to_serializable(metrics)
         
         return len(issues) == 0, issues, metrics
     
@@ -104,9 +121,14 @@ class AudioQualityValidator:
         
         # Calculate average metrics
         if all_metrics:
-            validation_results["summary"]["average_metrics"] = {
-                key: np.mean([m[key] for m in all_metrics if key in m])
-                for key in all_metrics[0].keys()
-            }
+            for key in all_metrics[0].keys():
+                try:
+                    values = [m[key] for m in all_metrics if key in m]
+                    validation_results["summary"]["average_metrics"][key] = float(np.mean(values))
+                except:
+                    continue
+        
+        # Ensure all values are JSON serializable
+        validation_results = self.convert_to_serializable(validation_results)
         
         return validation_results

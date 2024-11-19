@@ -13,7 +13,7 @@ class TrackMetadata:
     duration: float
     sample_rate: int
     tempo: float
-    key: Optional[str]  # Make key optional
+    key: Optional[str]
     mean_amplitude: float
     rms_energy: float
     zero_crossing_rate: float
@@ -25,15 +25,26 @@ class MetadataProcessor:
         self.downloads_dir = downloads_dir
         self.metadata_file = downloads_dir / "metadata.json"
         
+    def convert_to_serializable(self, obj):
+        """Convert numpy types to Python native types"""
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, dict):
+            return {key: self.convert_to_serializable(value) for key, value in obj.items()}
+        elif isinstance(obj, list):
+            return [self.convert_to_serializable(item) for item in obj]
+        return obj
+
     def estimate_key(self, y: np.ndarray, sr: int) -> Optional[str]:
         """Safely estimate the musical key of the track"""
         try:
-            # Use chromagram for key detection
             chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
             key_indices = np.mean(chroma, axis=1)
             key_index = np.argmax(key_indices)
-            
-            # Map key index to musical notation
             keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
             return keys[key_index]
         except Exception as e:
@@ -46,7 +57,7 @@ class MetadataProcessor:
         y, sr = librosa.load(audio_path, sr=22050)  # Fixed sample rate for consistency
         
         # Extract basic metadata
-        duration = librosa.get_duration(y=y, sr=sr)
+        duration = float(librosa.get_duration(y=y, sr=sr))
         
         # Extract musical features
         tempo, _ = librosa.beat.beat_track(y=y, sr=sr)
@@ -66,7 +77,7 @@ class MetadataProcessor:
             genre=genre,
             title=audio_path.stem,
             duration=duration,
-            sample_rate=sr,
+            sample_rate=int(sr),
             tempo=float(tempo),
             key=key,
             mean_amplitude=mean_amplitude,
@@ -118,7 +129,10 @@ class MetadataProcessor:
         # Calculate final statistics
         metadata["statistics"]["total_tracks"] = len(metadata["tracks"])
         if all_tempos:
-            metadata["statistics"]["average_tempo"] = sum(all_tempos) / len(all_tempos)
+            metadata["statistics"]["average_tempo"] = float(np.mean(all_tempos))
+            
+        # Convert all numpy types to Python native types
+        metadata = self.convert_to_serializable(metadata)
         
         return metadata
     
@@ -127,7 +141,7 @@ class MetadataProcessor:
         with open(self.metadata_file, 'w') as f:
             json.dump(metadata, f, indent=4)
     
-    def run(self) -> None:
+    def run(self) -> Dict[str, Any]:
         """Run the complete metadata extraction pipeline"""
         print("Starting metadata extraction...")
         metadata = self.process_all_tracks()
@@ -143,3 +157,5 @@ class MetadataProcessor:
         print("\nGenre distribution:")
         for genre, count in stats['genre_distribution'].items():
             print(f"  {genre}: {count} tracks")
+            
+        return metadata

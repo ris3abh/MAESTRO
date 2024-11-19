@@ -1,0 +1,50 @@
+{
+    "start_time": "2024-11-19 03:42:01",
+    "phases": {
+        "download": {
+            "duration": 59.53444790840149,
+            "tracks_downloaded": 20,
+            "validation_summary": {
+                "total_files": 20,
+                "passed_files": 20,
+                "failed_files": 0,
+                "average_metrics": {
+                    "duration": 237.97549687499995,
+                    "sample_rate": 48000.0,
+                    "clipping_ratio": 0.0010983407098000002,
+                    "dynamic_range": 15.01562237739563,
+                    "rms_mean": 0.26908765360713005,
+                    "rms_std": 0.1588495932519436
+                }
+            }
+        },
+        "preprocessing": {
+            "duration": 31.599446058273315,
+            "tracks_processed": 20,
+            "failed_tracks": 0
+        },
+        "feature_extraction": {
+            "duration": 78.86243915557861,
+            "tracks_analyzed": 20,
+            "failed_tracks": 0
+        },
+        "standardization": {
+            "duration": 6.911165237426758,
+            "tracks_standardized": 20,
+            "failed_tracks": 0
+        },
+        "organization": {
+            "duration": 2.1175482273101807,
+            "tracks_organized": 20,
+            "genres": {
+                "House Music": 20
+            }
+        }
+    },
+    "summary": {
+        "total_tracks_processed": 0,
+        "failed_tracks": 0,
+        "total_duration": 0
+    },
+    "error": "'total_duration'"
+}

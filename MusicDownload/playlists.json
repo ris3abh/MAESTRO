@@ -3,6 +3,10 @@
         {
             "url": "https://youtube.com/playlist?list=PL2N3NgN3V8FnkaG5kAZEcrofaLQXBTpGG&si=vliaL1KWDLMT0Wsp",
             "genre": "House Music"
+        },
+        {
+            "url": "https://youtube.com/playlist?list=PLgyvcAoYcg6tWTgAaW-01ShB7YAnPdZQ2&si=VvWEmbe8TBMBPchY",
+            "genre":"House Music"
         }
     ]
 }

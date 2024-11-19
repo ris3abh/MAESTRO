@@ -3,6 +3,8 @@ from music_download.metadata_processor import MetadataProcessor
 from music_download.quality_validator import AudioQualityValidator
 from music_download.audio_preprocessor import AudioPreprocessor
 from music_download.feature_extractor import FeatureExtractor
+from music_download.format_standardizer import FormatStandardizer
+from music_download.dataset_organizer import DatasetOrganizer
 from pathlib import Path
 import json
 import time
@@ -36,6 +38,21 @@ def main():
         action="store_true",
         help="Skip feature extraction"
     )
+    parser.add_argument(
+        "--skip-standardization",
+        action="store_true",
+        help="Skip format standardization"
+    )
+    parser.add_argument(
+        "--skip-organization",
+        action="store_true",
+        help="Skip dataset organization"
+    )
+    parser.add_argument(
+        "--skip-database",
+        action="store_true",
+        help="Skip database storage"
+    )
     
     args = parser.parse_args()
     
@@ -44,10 +61,15 @@ def main():
     downloads_dir = project_root / "downloads"
     processed_dir = project_root / "processed"
     features_dir = project_root / "features"
+    standardized_dir = project_root / "standardized"
+    dataset_dir = project_root / "dataset"
+    database_path = project_root / "music_dataset.db"
     
     # Create necessary directories
     processed_dir.mkdir(exist_ok=True)
     features_dir.mkdir(exist_ok=True)
+    standardized_dir.mkdir(exist_ok=True)
+    dataset_dir.mkdir(exist_ok=True)
     
     # Initialize pipeline statistics
     pipeline_stats = {
@@ -62,6 +84,9 @@ def main():
     
     try:
         # 1. Download Phase
+        metadata = None
+        features = None
+        
         if not args.skip_download:
             print("\n=== Starting Download Phase ===")
             start_time = time.time()
@@ -83,10 +108,10 @@ def main():
             
             pipeline_stats["phases"]["download"] = {
                 "duration": time.time() - start_time,
-                "tracks_downloaded": len(metadata["tracks"]),
+                "tracks_downloaded": len(metadata.get("tracks", [])),
                 "validation_summary": validation_results["summary"]
             }
-        
+                    
         # 2. Preprocessing Phase
         if not args.skip_preprocessing:
             print("\n=== Starting Preprocessing Phase ===")
@@ -121,17 +146,51 @@ def main():
                 "tracks_analyzed": features["statistics"]["processed_files"],
                 "failed_tracks": features["statistics"]["failed_files"]
             }
-        
-        # Update pipeline summary
-        pipeline_stats["end_time"] = time.strftime("%Y-%m-%d %H:%M:%S")
-        pipeline_stats["total_duration"] = time.time() - start_time
-        
-        # Save pipeline summary
-        save_pipeline_summary(project_root / "pipeline_summary.json", pipeline_stats)
-        
-        print("\n=== Pipeline Execution Complete ===")
-        print(f"Total execution time: {pipeline_stats['total_duration']:.2f} seconds")
-        print("Check pipeline_summary.json for detailed statistics")
+
+        # 4. Format Standardization Phase
+        if not args.skip_standardization:
+            print("\n=== Starting Format Standardization Phase ===")
+            start_time = time.time()
+            
+            standardizer = FormatStandardizer()
+            source_dir = processed_dir if not args.skip_preprocessing else downloads_dir
+            standardization_stats = standardizer.process_dataset(source_dir, standardized_dir)
+            
+            with open(standardized_dir / "standardization_stats.json", "w") as f:
+                json.dump(standardization_stats, f, indent=4)
+            
+            pipeline_stats["phases"]["standardization"] = {
+                "duration": time.time() - start_time,
+                "tracks_standardized": standardization_stats["processed_files"],
+                "failed_tracks": standardization_stats["failed_files"]
+            }
+
+        # 5. Dataset Organization Phase
+        if not args.skip_organization:
+            print("\n=== Starting Dataset Organization Phase ===")
+            start_time = time.time()
+            
+            # Load features and metadata if not already loaded
+            if features is None and (features_dir / "features.json").exists():
+                with open(features_dir / "features.json", "r") as f:
+                    features = json.load(f)
+            
+            if metadata is None and (downloads_dir / "metadata.json").exists():
+                with open(downloads_dir / "metadata.json", "r") as f:
+                    metadata = json.load(f)
+            
+            organizer = DatasetOrganizer(dataset_dir)
+            organization_info = organizer.organize_dataset(
+                standardized_dir if not args.skip_standardization else source_dir,
+                features,
+                metadata
+            )
+            
+            pipeline_stats["phases"]["organization"] = {
+                "duration": time.time() - start_time,
+                "tracks_organized": organization_info["total_tracks"],
+                "genres": organization_info["genres"]
+            }
         
     except Exception as e:
         print(f"\nError in pipeline execution: {str(e)}")
@@ -141,13 +200,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-# # Run complete pipeline
-# python main.py --config playlists.json
-
-# # Skip download and only process existing files
-# python main.py --config playlists.json --skip-download
-
-# # Run specific phases
-# python main.py --config playlists.json --skip-download --skip-preprocessing

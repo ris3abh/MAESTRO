@@ -1,4 +1,6 @@
 *.mp3
+*.wav
+*.h5
 *.webm.part
 env
 __pycache__
