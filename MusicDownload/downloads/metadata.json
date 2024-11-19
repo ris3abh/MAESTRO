@@ -1,0 +1,152 @@
+{
+    "tracks": [
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/6. Baby again..-uDJjMmLr_JQ.mp3",
+            "genre": "House Music",
+            "title": "6. Baby again..-uDJjMmLr_JQ",
+            "duration": 319.9637188208617,
+            "sample_rate": 22050,
+            "tempo": 129.19921875,
+            "key": "G",
+            "mean_amplitude": 0.24327468872070312,
+            "rms_energy": 0.34360095858573914,
+            "zero_crossing_rate": 0.09695855349691582,
+            "spectral_centroid": 2721.902495530774,
+            "spectral_bandwidth": 2817.720829674852
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/7. Rumble-1ZJaCyFJJSg.mp3",
+            "genre": "House Music",
+            "title": "7. Rumble-1ZJaCyFJJSg",
+            "duration": 146.57138321995464,
+            "sample_rate": 22050,
+            "tempo": 143.5546875,
+            "key": "F#",
+            "mean_amplitude": 0.2284650057554245,
+            "rms_energy": 0.3371002674102783,
+            "zero_crossing_rate": 0.08125617215963092,
+            "spectral_centroid": 2190.3630720175784,
+            "spectral_bandwidth": 2453.9253633476064
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/10. Admit It (u dont want 2)-0Tr8wcZ8gJg.mp3",
+            "genre": "House Music",
+            "title": "10. Admit It (u dont want 2)-0Tr8wcZ8gJg",
+            "duration": 385.0746485260771,
+            "sample_rate": 22050,
+            "tempo": 135.99917763157896,
+            "key": "G#",
+            "mean_amplitude": 0.27830901741981506,
+            "rms_energy": 0.3757866621017456,
+            "zero_crossing_rate": 0.10063866975511035,
+            "spectral_centroid": 2571.1637274239433,
+            "spectral_bandwidth": 2666.4209395830057
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/9. Jungle-O10Hs4lVcfs.mp3",
+            "genre": "House Music",
+            "title": "9. Jungle-O10Hs4lVcfs",
+            "duration": 198.80598639455783,
+            "sample_rate": 22050,
+            "tempo": 135.99917763157896,
+            "key": "G#",
+            "mean_amplitude": 0.17710568010807037,
+            "rms_energy": 0.26025858521461487,
+            "zero_crossing_rate": 0.08872575588355525,
+            "spectral_centroid": 2295.7679422040515,
+            "spectral_bandwidth": 2413.382411532154
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/2. Kyle (i found you)-Ci1KQhYZvMs.mp3",
+            "genre": "House Music",
+            "title": "2. Kyle (i found you)-Ci1KQhYZvMs",
+            "duration": 196.0714739229025,
+            "sample_rate": 22050,
+            "tempo": 112.34714673913044,
+            "key": "D#",
+            "mean_amplitude": 0.2986927926540375,
+            "rms_energy": 0.39567410945892334,
+            "zero_crossing_rate": 0.055514484809798696,
+            "spectral_centroid": 1948.1917353616966,
+            "spectral_bandwidth": 2447.892948673068
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/5. places to be-U4htmZsKRWY.mp3",
+            "genre": "House Music",
+            "title": "5. places to be-U4htmZsKRWY",
+            "duration": 226.67746031746032,
+            "sample_rate": 22050,
+            "tempo": 86.1328125,
+            "key": "D",
+            "mean_amplitude": 0.2775208652019501,
+            "rms_energy": 0.3628762364387512,
+            "zero_crossing_rate": 0.11637343117830072,
+            "spectral_centroid": 3089.563678298071,
+            "spectral_bandwidth": 2952.903549521992
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/3. adore u-UJEkJoKn-is.mp3",
+            "genre": "House Music",
+            "title": "3. adore u-UJEkJoKn-is",
+            "duration": 220.65342403628117,
+            "sample_rate": 22050,
+            "tempo": 123.046875,
+            "key": "G",
+            "mean_amplitude": 0.17339742183685303,
+            "rms_energy": 0.25877344608306885,
+            "zero_crossing_rate": 0.10341995208749868,
+            "spectral_centroid": 2386.942836800452,
+            "spectral_bandwidth": 2446.932844673602
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/4. stayinit-3hSQubTxXUk.mp3",
+            "genre": "House Music",
+            "title": "4. stayinit-3hSQubTxXUk",
+            "duration": 274.92539682539683,
+            "sample_rate": 22050,
+            "tempo": 135.99917763157896,
+            "key": "D#",
+            "mean_amplitude": 0.2630813419818878,
+            "rms_energy": 0.36050111055374146,
+            "zero_crossing_rate": 0.06612815112743856,
+            "spectral_centroid": 2072.995410286157,
+            "spectral_bandwidth": 2302.249729596805
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/8. Turn On The Lights again.. (feat. Future)-J0_pBtUAsKA.mp3",
+            "genre": "House Music",
+            "title": "8. Turn On The Lights again.. (feat. Future)-J0_pBtUAsKA",
+            "duration": 267.94666666666666,
+            "sample_rate": 22050,
+            "tempo": 129.19921875,
+            "key": "F#",
+            "mean_amplitude": 0.23736587166786194,
+            "rms_energy": 0.3312978744506836,
+            "zero_crossing_rate": 0.1232797606152513,
+            "spectral_centroid": 2973.770531340834,
+            "spectral_bandwidth": 2707.23246726723
+        },
+        {
+            "file_path": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/downloads/House Music/1. Clara (the night is dark)-rBO7VKSPhAc.mp3",
+            "genre": "House Music",
+            "title": "1. Clara (the night is dark)-rBO7VKSPhAc",
+            "duration": 278.4009977324263,
+            "sample_rate": 22050,
+            "tempo": 123.046875,
+            "key": "B",
+            "mean_amplitude": 0.16589313745498657,
+            "rms_energy": 0.24504287540912628,
+            "zero_crossing_rate": 0.10441550413104671,
+            "spectral_centroid": 2338.2335770252794,
+            "spectral_bandwidth": 2411.7305446662544
+        }
+    ],
+    "statistics": {
+        "total_tracks": 10,
+        "total_duration": 2515.091156462585,
+        "average_tempo": 125.45243671338673,
+        "genre_distribution": {
+            "House Music": 10
+        }
+    }
+}
