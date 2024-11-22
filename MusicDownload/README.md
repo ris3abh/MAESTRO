@@ -19,27 +19,24 @@ Phase 1 implements a robust data collection and preprocessing pipeline for audio
 ### Prerequisites
 ```bash
 # System Dependencies
-brew install ffmpeg libsndfile   # macOS
-# or
-sudo apt-get install ffmpeg libsndfile1-dev   # Ubuntu/Debian
 
-# Python Environment
+cd MusicDownload
 python -m venv env
 source env/bin/activate
-pip install -r requirements.txt
-brew install ffmpeg  # macOS
+brew install ffmpeg libsndfile
+pip install -r ../requirements.txt
 
-OR
+# or for Ubuntu/Debian
 
-sudo apt-get install ffmpeg  # Ubuntu
+cd MusicDownload
+python -m venv env
+source env/bin/activate
+sudo apt-get install ffmpeg libsndfile1-dev
+pip install -r ../requirements.txt
 
-brew install libsndfile  # macOS
+# or for windows
 
-OR
-
-sudo apt-get install libsndfile1-dev  # Ubuntu
-
-PS: sorry we don't do windows
+# OOPS: We don't do that here✌🏻
 ```
 
 Usage
