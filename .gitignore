@@ -1,7 +1,13 @@
+# Ignore all JSON files
+*.json
+
+# Ignore audio files
 *.mp3
 *.wav
-*.h5
-MusicDownload/dataset/metadata/*.json
 *.webm.part
+
+# Ignore temporary and environment files
 venv
 __pycache__
+
+!MusicDownload/pipeline_state.json
