@@ -3,17 +3,6 @@
 ## Overview
 Phase 1 implements a robust data collection and preprocessing pipeline for audio processing. This phase focuses on gathering high-quality audio data, standardizing formats, and preparing the dataset for further processing.
 
-## Table of Contents
-- [Setup](#setup)
-- [Data Pipeline Architecture](#data-pipeline-architecture)
-- [Features](#features)
-- [Usage](#usage)
-- [Quality Control](#quality-control)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
-- [Next Steps](#next-steps)
-- [Contributing](#contributing)
-
 ## Setup
 
 ### Prerequisites
