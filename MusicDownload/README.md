@@ -75,8 +75,8 @@ python optimized_pipeline.py --config config.json --project-dir . --skip metadat
 python optimized_pipeline.py --config config.json --project-dir . --skip features
 ```
 
-mermaid
-```
+
+```mermaid
 graph TD
     A[YouTube Source] --> B[Download Module]
     B --> C[Quality Check]
