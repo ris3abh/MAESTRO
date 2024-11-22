@@ -3,39 +3,123 @@
 ## Overview
 Phase 1 implements a robust data collection and preprocessing pipeline for audio processing. This phase focuses on gathering high-quality audio data, standardizing formats, and preparing the dataset for further processing.
 
-## Table of Contents
-- [Setup](#setup)
-- [Data Pipeline Architecture](#data-pipeline-architecture)
-- [Features](#features)
-- [Usage](#usage)
-- [Directory Structure](#directory-structure)
-- [Quality Control](#quality-control)
-- [Configuration](#configuration)
-- [Troubleshooting](#troubleshooting)
+## How to Setup the Configuration File
+
+1. **Create `config.json`**:
+    - In your project directory, create a file named `config.json`.
+    - Paste the provided JSON structure into the file. 
+
+2. **Populate Paths**:
+    - Adjust the `paths` section:
+        - `downloads_dir`: Path to your directory where raw audio files will be downloaded.
+        - `dataset_dir`: Path for storing processed dataset files.
+        - `features_dir`: Directory to save extracted features.
+        - `processed_dir`: Path to save processed audio files.
+        - `temp_dir`: Temporary directory for intermediate files.
+
+3. **Set Download Settings**:
+    - Fill out the `download_settings` section with the URLs of the YouTube playlists and their respective genres and tags.
+    - Set `skip_existing` to `true` if you want to avoid downloading duplicates.
+    - Choose an `audio_format` like `"bestaudio/best"` and set the `audio_codec` to `"mp3"`.
+    - Enable or disable `include_metadata` fields like `title`, `artist`, `album`, `track`, `cover`, `date`, `lyrics` according to your needs.
+
+4. **Audio Settings**:
+    - Set `target_sr` to the desired sample rate (e.g., `44100`).
+    - Adjust `min_duration` and `max_duration` according to your desired audio file duration range.
+    - Define `target_lufs` for loudness normalization, and enable `normalize_audio` or `remove_silence` as needed.
+
+5. **Processing Settings**:
+    - Configure `parallel_processing` if you wish to utilize multithreading (`max_workers`).
+    - Set `keep_temp_files` to `false` if you do not need to retain intermediate files.
+    - Define the `batch_size` for processing audio and enable `use_gpu` for efficient computation if available.
+    - Specify `retry_count` and `retry_delay` to manage potential failures.
+
+6. **Validation Thresholds**:
+    - Set the `min_quality_score` to filter audio files based on quality metrics.
+    - Adjust thresholds for `min_bitrate`, `max_silence_duration`, `min_dynamic_range`, and `max_clipping_ratio` as per your requirements.
+
+7. **Output Configuration**:
+    - Enable `by_genre` and `by_subgenre` if you wish to organize output files based on these criteria.
+    - Define `metadata_format` (e.g., `"json"`) and `feature_format` (e.g., `"h5"`).
+    - Set `organize_by_quality` to `true` if you want to categorize files based on their audio quality.
+
+8. **Logging Configuration**:
+    - Set the `logging.level` to `INFO`, `DEBUG`, or `ERROR` depending on the detail level of logging you need.
+    - Enable `console_output` to see logs in the terminal and configure the `log_file` to specify where you want the log file to be saved.
+    - Decide whether you want performance statistics saved (`save_statistics`).
+
+9. **Feature Extraction**:
+    - Configure `temporal`, `spectral`, and `harmonic` extraction parameters according to the types of audio features you need for your application.
+    - Set the number of MFCCs with `n_mfcc` for spectral features extraction.
+
+10. **Cache Settings**:
+    - Enable `cache` if you want to persist extracted features and speed up processing.
+    - Set `location` to the directory where cached files should be stored.
+    - Specify `max_size` and `cleanup_threshold` according to your disk capacity.
+    - Define `feature_cache_ttl` for how long cached features should be kept before removal.
+
+11. **Save and Run**:
+    - Once your `config.json` file is set up, save it and run your pipeline according to the defined configurations.
+
 
 ## Setup
 
 ### Prerequisites
 ```bash
 # System Dependencies
-brew install ffmpeg libsndfile   # macOS
-# or
-sudo apt-get install ffmpeg libsndfile1-dev   # Ubuntu/Debian
 
-# Python Environment
+cd MusicDownload
 python -m venv env
 source env/bin/activate
-pip install -r requirements.txt
+brew install ffmpeg libsndfile
+pip install -r ../requirements.txt
+
+# or for Ubuntu/Debian
+
+cd MusicDownload
+python -m venv env
+source env/bin/activate
+sudo apt-get install ffmpeg libsndfile1-dev
+pip install -r ../requirements.txt
+
+# or for windows
+
+# OOPS: We don't do that here✌🏻
 ```
 
-### Installation Verification
-```python
-from data_pipeline import AudioDataPipeline
-pipeline = AudioDataPipeline()
-print(pipeline.get_dataset_stats())
+Usage
+Basic Commands
+To run the complete pipeline:
+
+```
+python optimized_pipeline.py --config config.json --project-dir .
 ```
 
-## Data Pipeline Architecture
+Skipping Phases - 
+The pipeline allows skipping specific phases for greater flexibility:
+
+1. Skip Download Phase:
+
+```
+python optimized_pipeline.py --config config.json --project-dir . --skip download
+```
+
+Skip Multiple Phases:
+
+```
+python optimized_pipeline.py --config config.json --project-dir . --skip download features
+```
+
+Other Combinations:
+```
+# Skip only feature extraction:
+python optimized_pipeline.py --config config.json --project-dir . --skip features
+# Skip metadata extraction:
+python optimized_pipeline.py --config config.json --project-dir . --skip metadata
+# Skip features and metadata:
+python optimized_pipeline.py --config config.json --project-dir . --skip features
+```
+
 
 ```mermaid
 graph TD
@@ -46,181 +130,3 @@ graph TD
     E --> F[Dataset Organization]
     F --> G[Database Storage]
 ```
-
-## Features
-
-### 1. Data Collection
-- Integrated YouTube playlist downloading
-- Multi-format audio support
-- Concurrent download capabilities
-- Progress tracking and logging
-
-### 2. Quality Control
-- Audio quality metrics analysis
-- Format validation
-- Duration checks
-- Sample rate verification
-- Amplitude analysis
-- Metadata validation
-
-### 3. Metadata Management
-- Comprehensive metadata extraction
-- SQLite database storage
-- Structured data organization
-- Statistical analysis capabilities
-
-### 4. Format Standardization
-- Sample rate conversion
-- Channel standardization
-- Format normalization
-- Quality preservation checks
-
-## Usage
-
-### Basic Usage
-```python
-from data_pipeline import AudioDataPipeline
-
-# Initialize pipeline
-pipeline = AudioDataPipeline()
-
-# Process a YouTube playlist
-pipeline.process_download(
-    playlist_url="https://www.youtube.com/playlist?list=YOUR_PLAYLIST_ID",
-    genre="electronic"
-)
-```
-
-### Advanced Usage
-```python
-# Custom configuration
-config = {
-    "target_sample_rate": 44100,
-    "target_channels": 2,
-    "min_duration": 30,
-    "max_duration": 600,
-    "min_quality_score": 0.7
-}
-
-pipeline = AudioDataPipeline(config_path="custom_config.json")
-
-# Process multiple playlists
-playlists = [
-    ("playlist_url_1", "genre_1"),
-    ("playlist_url_2", "genre_2")
-]
-
-for url, genre in playlists:
-    pipeline.process_download(url, genre)
-```
-
-## Directory Structure
-```
-dataset/
-├── raw/
-│   └── downloads/
-│       └── YYYYMMDD_HHMMSS/
-├── processed/
-│   ├── train/
-│   ├── validation/
-│   └── test/
-└── metadata/
-    ├── audio_metadata.db
-    └── processing_logs/
-```
-
-## Quality Control
-
-### Audio Quality Metrics
-- **Sample Rate**: Minimum 44.1kHz
-- **Bit Depth**: 16-bit minimum
-- **Duration**: 30s to 10m
-- **Quality Score Components**:
-  - Peak amplitude
-  - DC offset
-  - RMS levels
-  - Dynamic range
-  - Phase correlation
-
-### Quality Scoring System
-```python
-Quality Score = Base Score (1.0)
-    * Duration Factor (0.5-1.0)
-    * Sample Rate Factor (0.7-1.0)
-    * Amplitude Factor (0.6-1.0)
-    * DC Offset Factor (0.8-1.0)
-```
-
-## Configuration
-
-### pipeline_config.json
-```json
-{
-    "target_sample_rate": 44100,
-    "target_channels": 2,
-    "min_duration": 30,
-    "max_duration": 600,
-    "min_quality_score": 0.7,
-    "target_formats": ["mp3", "wav"],
-    "split_ratio": {
-        "train": 0.8,
-        "validation": 0.1,
-        "test": 0.1
-    }
-}
-```
-
-### Quality Thresholds
-```json
-{
-    "quality_thresholds": {
-        "min_peak_amplitude": 0.1,
-        "max_dc_offset": 0.01,
-        "min_rms": -40,
-        "max_rms": -12
-    }
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **FFmpeg Not Found**
-```bash
-# Solution
-brew install ffmpeg  # macOS
-sudo apt-get install ffmpeg  # Ubuntu
-```
-
-2. **Library Issues**
-```bash
-# Solution for libsndfile errors
-brew install libsndfile  # macOS
-sudo apt-get install libsndfile1-dev  # Ubuntu
-```
-
-3. **Permission Issues**
-```bash
-# Solution
-chmod -R 755 dataset/
-```
-
-### Error Handling
-- Download failures are logged and retried
-- Corrupted files are automatically removed
-- Low-quality files are flagged for review
-- All operations are logged for debugging
-
-## Next Steps
-1. Run the pipeline verification script
-2. Monitor dataset growth
-3. Review quality metrics
-4. Adjust configuration as needed
-5. Proceed to Phase 2 (Style Analysis)
-
-## Contributing
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
