@@ -52,16 +52,13 @@ MAESTRO.ai is a state-of-the-art automated music production system that leverage
 - **Mastering Standards Compliance**
 - **Reference Track Comparison**
 
-```mermaid
-graph TD
-    A[Audio Input] --> B[Preprocessing]
-    B --> C[Feature Extraction]
-    C --> D[Style Analysis]
-    D --> E[Quality Assessment]
-    E --> F[Style Transfer]
-    F --> G[Post-Processing]
-    G --> H[Output Generation]
-```
+<p align="center">
+  <img src="src/Blank diagram (1).png" alt="Blank diagram (1).png" width="200"/>
+</p>
+
+<p align="center">
+  <img src="src/Blank diagram.png" alt="Blank diagram.png" width="200"/>
+</p>
 
 ## 🙏 Acknowledgments
 
