@@ -1,124 +1,146 @@
 #!/usr/bin/env python3
-# YouTube Music Playlist Downloader
-version = "1.4.0"
+# download_pipeline.py
 
 import os
 import json
+import hashlib
 from pathlib import Path
-from typing import Dict, Any
-from yt_dlp import YoutubeDL
+from typing import Dict, Any, List
 from .downloader import setup_config, generate_playlist
 
 class MusicDownloadPipeline:
-    def __init__(self, config_path: str):
+    def __init__(self, config_path: str, downloads_dir: Path = None):
         """
         Initialize the music download pipeline
         
         Args:
             config_path (str): Path to JSON config file containing playlist URLs and genres
+            downloads_dir (Path): Directory for downloads
         """
         self.config_path = config_path
-        self.downloads_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "downloads"
-        self.downloads_dir.mkdir(exist_ok=True)
+        self.downloads_dir = Path(downloads_dir) if downloads_dir else Path("downloads")
+        self.downloads_dir.mkdir(parents=True, exist_ok=True)
+        self.state_file = self.downloads_dir / ".download_state.json"
+        self.load_config()
+        self.load_state()
 
     def load_config(self) -> Dict[str, Any]:
         """Load and validate the configuration file"""
         try:
             with open(self.config_path) as f:
-                config = json.load(f)
+                self.config = json.load(f)
                 
-            required_fields = ["playlists"]
-            for field in required_fields:
-                if field not in config:
-                    raise ValueError(f"Missing required field '{field}' in config")
-                    
-            for playlist in config["playlists"]:
-                if "url" not in playlist or "genre" not in playlist:
-                    raise ValueError("Each playlist must have 'url' and 'genre' fields")
-                    
-            return config
+            if "download_settings" not in self.config:
+                raise ValueError("Missing 'download_settings' in config")
+            if "playlists" not in self.config["download_settings"]:
+                raise ValueError("Missing 'playlists' in download_settings")
+                
+            return self.config
         except json.JSONDecodeError:
             raise ValueError("Invalid JSON format in config file")
         except FileNotFoundError:
             raise FileNotFoundError(f"Config file not found: {self.config_path}")
 
-    def setup_download_config(self, playlist_config: Dict[str, str]) -> Dict[str, Any]:
-        """
-        Set up the download configuration for a playlist
-        
-        Args:
-            playlist_config (dict): Configuration for a single playlist
+    def load_state(self):
+        """Load download state"""
+        if self.state_file.exists():
+            with open(self.state_file) as f:
+                self.state = json.load(f)
+        else:
+            self.state = {"downloaded_files": {}}
+
+    def save_state(self):
+        """Save download state"""
+        with open(self.state_file, 'w') as f:
+            json.dump(self.state, f, indent=4)
+
+    def get_file_hash(self, file_path: Path) -> str:
+        """Calculate file hash"""
+        hasher = hashlib.md5()
+        with open(file_path, 'rb') as f:
+            while chunk := f.read(8192):
+                hasher.update(chunk)
+        return hasher.hexdigest()
+
+    def needs_download(self, url: str, file_path: Path, check_modified: bool) -> bool:
+        """Check if file needs to be downloaded"""
+        if not file_path.exists():
+            return True
             
-        Returns:
-            dict: Complete download configuration
-        """
-        download_config = {
-            "url": playlist_config["url"],
-            "reverse_playlist": False,
-            "use_title": True,
-            "use_uploader": True,
-            "use_playlist_name": True
-        }
-        return setup_config(download_config)
+        if not check_modified:
+            return False
+            
+        current_hash = self.get_file_hash(file_path)
+        return self.state["downloaded_files"].get(url) != current_hash
 
-    def process_playlist(self, playlist_config: Dict[str, str]) -> None:
-        """
-        Process and download a single playlist
+    def run(self, skip_existing: bool = True, check_modified: bool = True) -> List[Path]:
+        """Run the download pipeline"""
+        downloaded_files = []
         
-        Args:
-            playlist_config (dict): Configuration for the playlist
-        """
-        genre = playlist_config["genre"]
-        genre_dir = self.downloads_dir / genre
-        genre_dir.mkdir(exist_ok=True)
+        for playlist in self.config["download_settings"]["playlists"]:
+            genre = playlist["genre"]
+            subgenre = playlist.get("subgenre", "")
+            
+            # Create genre directory
+            genre_dir = self.downloads_dir / genre
+            if subgenre:
+                genre_dir = genre_dir / subgenre
+            genre_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Change to genre directory for download
+            original_dir = os.getcwd()
+            os.chdir(str(genre_dir))
 
-        # Change to genre directory for download
-        original_dir = os.getcwd()
-        os.chdir(str(genre_dir))
-
-        try:
-            download_config = self.setup_download_config(playlist_config)
-            generate_playlist(
-                download_config,
-                ".playlist_config.json",
-                update=False,
-                force_update=False,
-                regenerate_metadata=False,
-                single_playlist=True,
-                current_playlist_name=None,
-                track_num_to_update=None
-            )
-        finally:
-            os.chdir(original_dir)
-
-    def run(self) -> None:
-        """Run the complete download pipeline"""
-        config = self.load_config()
-        
-        for playlist in config["playlists"]:
-            print(f"\nProcessing playlist for genre: {playlist['genre']}")
-            print(f"URL: {playlist['url']}")
             try:
-                self.process_playlist(playlist)
-                print(f"Successfully downloaded playlist for {playlist['genre']}")
-            except Exception as e:
-                print(f"Error processing playlist: {str(e)}")
+                # Setup download configuration
+                download_config = {
+                    "url": playlist["url"],
+                    "reverse_playlist": False,
+                    "use_title": True,
+                    "use_uploader": True,
+                    "use_playlist_name": True,
+                    # Use download_settings instead of audio_settings
+                    "audio_format": self.config["download_settings"]["audio_format"],
+                    "audio_codec": self.config["download_settings"]["audio_codec"],
+                    "audio_quality": self.config["download_settings"]["audio_quality"],
+                    "name_format": self.config["download_settings"]["name_format"],
+                    "include_metadata": self.config["download_settings"]["include_metadata"]
+                }
+                
+                # Generate playlist
+                generate_playlist(
+                    setup_config(download_config),
+                    ".playlist_config.json",
+                    update=False,
+                    force_update=False,
+                    regenerate_metadata=False,
+                    single_playlist=True,
+                    current_playlist_name=None,
+                    track_num_to_update=None
+                )
+                
+                # Track downloaded files
+                audio_codec = self.config["download_settings"]["audio_codec"]
+                for file_path in genre_dir.glob(f"*.{audio_codec}"):
+                    if skip_existing and not self.needs_download(playlist["url"], file_path, check_modified):
+                        print(f"Skipping existing file: {file_path.name}")
+                        continue
+                        
+                    downloaded_files.append(file_path)
+                    self.state["downloaded_files"][playlist["url"]] = self.get_file_hash(file_path)
 
-def main():
-    """Main entry point for the download pipeline"""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Download music playlists by genre")
-    parser.add_argument(
-        "--config", 
-        required=True,
-        help="Path to JSON config file containing playlist URLs and genres"
-    )
-    
-    args = parser.parse_args()
-    
-    pipeline = MusicDownloadPipeline(args.config)
-    pipeline.run()
+            finally:
+                os.chdir(original_dir)
+        
+        # Save state
+        self.save_state()
+        
+        return downloaded_files
 
-if __name__ == "__main__":
-    main()
+    def cleanup(self):
+        """Clean up temporary files"""
+        for genre_dir in self.downloads_dir.iterdir():
+            if genre_dir.is_dir():
+                config_file = genre_dir / ".playlist_config.json"
+                if config_file.exists():
+                    config_file.unlink()

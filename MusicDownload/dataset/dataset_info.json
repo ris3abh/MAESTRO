@@ -1,8 +1,0 @@
-{
-    "total_tracks": 90,
-    "genres": {
-        "House Music": 90
-    },
-    "features_file": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/dataset/features/features.h5",
-    "metadata_file": "/Users/rishabhsharma/Documents/GitHub/MAESTRO/MusicDownload/dataset/metadata/metadata.json"
-}

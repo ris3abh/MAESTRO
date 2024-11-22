@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# dataset_organizer.py
+
 import h5py
 import json
 import shutil

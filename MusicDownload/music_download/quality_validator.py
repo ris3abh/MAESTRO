@@ -1,7 +1,11 @@
+#!/usr/bin/env python3
+# quality_validator.py
+
 import librosa
 import numpy as np
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Any
+import datetime
 
 class AudioQualityValidator:
     def __init__(self, 
@@ -78,6 +82,42 @@ class AudioQualityValidator:
         metrics = self.convert_to_serializable(metrics)
         
         return len(issues) == 0, issues, metrics
+    
+    def process_file(self, audio_path: Path) -> Dict[str, Any]:
+        """
+        Process and validate a single audio file
+        Returns validation results and metrics
+        """
+        try:
+            passed, issues, metrics = self.check_audio_quality(audio_path)
+            
+            validation_result = {
+                "passed": passed,
+                "issues": issues,
+                "metrics": metrics,
+                "timestamp": datetime.now().isoformat(),
+                "filename": audio_path.name
+            }
+            
+            if passed:
+                print(f"✓ Validated: {audio_path.name}")
+            else:
+                print(f"✗ Quality issues in {audio_path.name}:")
+                for issue in issues:
+                    print(f"  - {issue}")
+            
+            return validation_result
+            
+        except Exception as e:
+            error_msg = f"Error validating {audio_path.name}: {str(e)}"
+            print(error_msg)
+            return {
+                "passed": False,
+                "issues": [error_msg],
+                "metrics": {},
+                "timestamp": datetime.now().isoformat(),
+                "filename": audio_path.name
+            }
     
     def validate_dataset(self, downloads_dir: Path) -> Dict[str, Dict]:
         """Validate all audio files in the dataset"""

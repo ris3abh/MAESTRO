@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# format_standardizer.py
+
 import numpy as np
 import soundfile as sf
 import librosa

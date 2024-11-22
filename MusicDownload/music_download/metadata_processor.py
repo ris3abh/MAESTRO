@@ -1,9 +1,16 @@
+#!/usr/bin/env python3
+# metadata_processor.py
+
+import os
 import json
 import librosa
 import numpy as np
 from pathlib import Path
 from typing import Dict, Any, Optional
+from mutagen.id3 import ID3
+from datetime import datetime
 from dataclasses import dataclass, asdict
+import hashlib
 
 @dataclass
 class TrackMetadata:
@@ -21,9 +28,114 @@ class TrackMetadata:
     spectral_bandwidth: float
 
 class MetadataProcessor:
-    def __init__(self, downloads_dir: Path):
-        self.downloads_dir = downloads_dir
-        self.metadata_file = downloads_dir / "metadata.json"
+    def __init__(self, dataset_dir: Path):
+        """Initialize metadata processor"""
+        self.dataset_dir = Path(dataset_dir)
+        self.metadata_dir = self.dataset_dir / "metadata"
+        self.metadata_file = self.metadata_dir / "dataset_metadata.json"
+        self.downloads_dir = dataset_dir.parent / "downloads"  # Add this line
+        self.metadata_dir.mkdir(parents=True, exist_ok=True)
+        
+    def _hash_file(self, file_path: Path) -> str:
+        """Calculate file hash"""
+        import hashlib
+        hasher = hashlib.md5()
+        with open(file_path, 'rb') as f:
+            while chunk := f.read(8192):
+                hasher.update(chunk)
+        return hasher.hexdigest()
+        
+    def process_file(self, audio_path: Path) -> Dict[str, Any]:
+        """Process a single audio file and extract metadata"""
+        try:
+            # Load audio file
+            y, sr = librosa.load(audio_path, sr=None)
+            
+            # Extract basic metadata
+            duration = librosa.get_duration(y=y, sr=sr)
+            
+            # Extract musical features
+            tempo, beats = librosa.beat.beat_track(y=y, sr=sr)
+            
+            # Get ID3 tags if available
+            tags = {}
+            try:
+                audio = ID3(audio_path)
+                tags = {
+                    "title": str(audio.get("TIT2", "")),
+                    "artist": str(audio.get("TPE1", "")),
+                    "album": str(audio.get("TALB", "")),
+                    "year": str(audio.get("TDRC", "")),
+                    "genre": str(audio.get("TCON", ""))
+                }
+            except Exception as e:
+                print(f"Warning: Could not read ID3 tags from {audio_path.name}: {e}")
+            
+            # Calculate file hash
+            file_hash = self._hash_file(audio_path)
+            
+            # Extract audio features
+            metadata = {
+                "file_info": {
+                    "filename": audio_path.name,
+                    "path": str(audio_path),
+                    "size_bytes": audio_path.stat().st_size,
+                    "format": audio_path.suffix[1:],
+                    "hash": file_hash
+                },
+                "audio_info": {
+                    "duration": float(duration),
+                    "sample_rate": int(sr),
+                    "channels": len(y.shape) if len(y.shape) > 1 else 1,
+                },
+                "musical_info": {
+                    "tempo": float(tempo),
+                    "beat_frames": beats.tolist() if len(beats) > 0 else [],
+                    "estimated_key": self._estimate_key(y, sr)
+                },
+                "tags": tags,
+                "processing_info": {
+                    "processed_date": datetime.now().isoformat(),
+                    "processor_version": "1.0.0"
+                }
+            }
+            
+            # Save individual metadata file
+            metadata_file = self.metadata_dir / f"{audio_path.stem}_metadata.json"
+            with open(metadata_file, 'w') as f:
+                json.dump(metadata, f, indent=4)
+                
+            print(f"Processed metadata for: {audio_path.name}")
+            return metadata
+            
+        except Exception as e:
+            print(f"Error processing metadata for {audio_path.name}: {e}")
+            return {
+                "file_info": {
+                    "filename": audio_path.name,
+                    "path": str(audio_path),
+                    "hash": self._hash_file(audio_path)
+                },
+                "error": str(e)
+            }
+    
+    def _estimate_key(self, y, sr) -> Optional[str]:
+        """Estimate musical key of the audio"""
+        try:
+            chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
+            key_indices = np.mean(chroma, axis=1)
+            key_index = np.argmax(key_indices)
+            keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+            return keys[key_index]
+        except:
+            return None
+
+    def get_state(self) -> Dict[str, Any]:
+        """Get current processing state"""
+        return {
+            "total_files_processed": len(list(self.metadata_dir.glob("*.json"))),
+            "last_update": datetime.now().isoformat()
+        }
         
     def convert_to_serializable(self, obj):
         """Convert numpy types to Python native types"""
@@ -38,18 +150,6 @@ class MetadataProcessor:
         elif isinstance(obj, list):
             return [self.convert_to_serializable(item) for item in obj]
         return obj
-
-    def estimate_key(self, y: np.ndarray, sr: int) -> Optional[str]:
-        """Safely estimate the musical key of the track"""
-        try:
-            chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
-            key_indices = np.mean(chroma, axis=1)
-            key_index = np.argmax(key_indices)
-            keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-            return keys[key_index]
-        except Exception as e:
-            print(f"Warning: Could not estimate key: {str(e)}")
-            return None
 
     def process_audio_file(self, audio_path: Path, genre: str) -> TrackMetadata:
         """Extract audio features and metadata from a single track"""
