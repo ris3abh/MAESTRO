@@ -60,16 +60,8 @@ MAESTRO.ai is a state-of-the-art automated music production system that leverage
 - WaveNet architecture by DeepMind
 - Audio processing libraries: librosa, pytorch-audio
 - FFmpeg for media handling
-- All our [contributors](CONTRIBUTORS.md)
 
 ---
+## Disclaimer
 
-<div align="center">
-
-Made with ❤️ by ris3abh
-
-[Website](https://maestro-ai.com) •
-[Documentation](https://docs.maestro-ai.com) •
-[Issue Tracker](https://github.com/yourusername/maestro-ai/issues)
-
-</div>
+Please respect the copyright of any videos you download. The creator of this program will not be held liable for any copyright violations caused by the usage of this program.
