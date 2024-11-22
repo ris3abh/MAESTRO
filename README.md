@@ -55,15 +55,6 @@ MAESTRO.ai is a state-of-the-art automated music production system that leverage
 ![Data Representation](src/Bd.png)
 ![Data Representation](src/Bd1.png)
 
-
-<p align="center">
-  <img src="src/Blank diagram (1).png" alt="Blank diagram (1).png" width="500"/>
-</p>
-
-<p align="center">
-  <img src="src/Blank diagram.png" alt="Blank diagram.png" width="500"/>
-</p>
-
 ## 🙏 Acknowledgments
 
 - WaveNet architecture by DeepMind
