@@ -1,7 +1,7 @@
 *.mp3
 *.wav
 *.h5
-MusicDownload/dataset/metadata
+MusicDownload/dataset/metadata/*.json
 *.webm.part
 venv
 __pycache__
